@@ -1,0 +1,138 @@
+Polimorfizm – możliwość przypisania obiektu typu podrzędnego do referencji typu
+nadrzędnego. Innymi słowami: przypisujemy obiekt bardziej szczegółowy do
+referencji ogólniejszej;
+
+
+Pomimo użycia referencji typu ogólniejszego (Vehicle), wywołanie metody makeSound()
+na zmiennej electricVehicle powoduje tak naprawdę wywołanie nadpisanej
+metody makeSound() z klasy ElecticVehicle.
+
+!!!Metody instancji zawsze wywoływane są na typie obiektu, a nie na referencji!!!
+
+Jest to wirtualne wywoływanie metod  - każdy obiekt w Javie posiada referencję
+wskazującą na obiekt przechowujący informację o swoim typie (klasie) oraz
+ poszczególnych wartościach przypisanych do pól.
+Obiekty reprezentujące typ znajdują się w przestrzeni pamięci o nazwie Method Area.
+Method Area przechowuje m.in. informacje o nazwie klasy, metodach w niej zawartych
+ oraz informacje o klasie nadrzędnej.
+Wywołując metodę makeSound() na referencji electricVehicle (który jest typu Vehicle),
+ przechodzimy  do obiektu, na który ta referencja wskazuje.
+Obiekt posiada referencję na tzw. vtable czyli tablicę metod, które możemy na nim
+ wywołać.  Jeżeli znajduje się tam metoda makeSound() to jest ona ładowana do pamięci.
+ Jeżeli w klasie ElectricVehicle nie będzie metody makeSound() to w vtable będzie
+  referencja na metodę makeSound() z klasy Vehicle.
+Takie zachowanie, polegające na wyszukiwaniu metody, która ma zostać wywołana w
+trakcie działania programu nazywamy dynamicznym wiązaniem lub późnym wiązaniem
+(dynamic dispatch)
+
+Praktyczne wykorzystanie polimorfizmu:
+
+Vehicle[] vehicles = new Vehicle[3];
+vehicles[0] = new ElectricVehicle("Tesla");
+vehicles[1] = new InternalCombustionVehicle("Ferrari");
+vehicles[2] = new Vehicle("Ogólny pojazd");
+
+for(Vehicle v : vehicles) {
+    v.makeSound();
+}
+
+Zaleta polimorfizmu używanego w metodach (definiowanie argumentu typu ogólniejszego
+ - nie trzeba tworzyć wielu przeciążonych metod dla każdego bardziej szczegółowego typu):
+Metoda w VehicleRunner:
+
+public static void changeVehicleName(Vehicle vehicleForNameChange, String newName) {
+    vehicleForNameChange.setName(newName);
+}
+
+…oraz wywołanie jej w tym VehicleRunner:
+System.out.println(electricVehicle.getName());
+
+changeVehicleName(electricVehicle, "Melex");
+
+System.out.println(electricVehicle.getName());
+
+
+Rzutowanie typów obiektowych:
+Jeżeli pomiędzy klasami istnieje relacja jaką jest dziedziczenie
+to dozwolone jest zastosowanie rzutowania precyzując typ obiektu.
+
+Do klasy ElectricVehicle dodaj metodę chargeBattery(),
+a do klasy InternalCombustionVehicle dodaj metodę refuel():
+public void chargeBattery(){
+    System.out.println("Ładuję baterię!");
+}
+
+public void refuel() {
+    System.out.println("Tankuję paliwo!");
+}
+
+…i sprawdzamy:
+
+Vehicle gasolineCar = new InternalCombustionVehicle();
+gasolineCar.refuel();  //błąd
+
+Vehicle electricCar = new ElectricVehicle();
+electricCar.chargeBattery(); // błąd
+
+
+!!!Nie wykrywa nam metod ponieważ metody instancji(obiektu) wywoływane są
+na typie obiektu, ale żeby je wywołać, to metoda o wskazanej sygnaturze
+musi być dostępna w typie referencji!!!
+Są dwa wyjścia do wyboru, żeby to naprawić:
+•	Zadeklarowanie gasolineCar jako InternalCombustionVehicle, a electricCar
+jako ElectricVehicle;
+•	Zmiana typu referencji poprzez rzutowanie;
+
+
+//rzutowanie do zmiennej
+ElectricVehicle moreSpecificElectricCar = (ElectricVehicle) electricCar;
+moreSpecificElectricCar.chargeBattery();
+
+//rzutowanie "w locie"
+((ElectricVehicle) electricCar).chargeBattery();
+
+Można również rzutować „w górę” hierarchii czyli z typu bardziej
+specyficznego na typ ogólniejszy, ale traci się wtedy dostęp do metod
+i pól klasy bardziej specyficznej.
+Ogólna zasada: powinniśmy tak implementować nasz kod, aby jak najmniej
+używać rzutowania na typach obiektowych.
+
+
+instanceof:
+if(moreSpecificElectricCar instanceof Vehicle)
+    System.out.println("moreSpecificElectricCar dziedziczy po Vehicle.");
+else
+    System.out.println("moreSpecificElectricCar NIE dziedziczy po Vehicle");
+
+
+    Kursantka musi znać:
+    •	Czym jest polimorfizm;
+    Polimorfizm – możliwość przypisania obiektu typu podrzędnego do referencji typu nadrzędnego.
+    Innymi słowami: przypisujemy obiekt bardziej szczegółowy do referencji ogólniejszej;
+    •	Metody instancji zawsze wywoływane są na typie obiektu, a nie na referencji.
+    •	W przypadku przypisania obiektu do referencji typu ogólniejszego: metody instancji(obiektu)
+     wywoływane są na typie obiektu, ale żeby je wywołać, to metoda o wskazanej sygnaturze musi
+     być dostępna w typie referencji!!!
+    •	Jeżeli pomiędzy klasami istnieje relacja jaką jest dziedziczenie  to dozwolone jest zastosowanie
+    rzutowania precyzując typ obiektu.
+    •	Można rzutować obiekty z typu ogólniejszego na bardziej specyficzny.
+    •	Można również rzutować „w górę” hierarchii czyli z typu bardziej specyficznego na typ
+    ogólniejszy, ale traci się wtedy dostęp do metod i pól klasy bardziej specyficznej.
+    •	Ogólna zasada: powinniśmy tak implementować nasz kod, aby jak najmniej używać rzutowania
+     na typach obiektowych (po prostu jak się da to unikać).
+
+Praca domowa_1:
+Napisz program, który będzie zarządzał Software housem. Zdefiniuj klasy:
+Employee – przechowuje imię, nazwisko, oraz wysokość wypłaty;
+Programmer – rozszerza klasę Employee o dodatkowe pole: technologyStack
+(chodzi o język programowania, frameworki itp);
+Tester – rozszerza klasę Employee o dodatkowe dwa pola boolean: isAutomaticTester oraz isManualTester;
+ProjectManager – rozszerza klasę Employee o dodatkowe pole boolean: makingLifeDifficult;
+SoftwareHouse – przechowuje informacje o pracownikach w tablicy. W konstruktorze powinno
+przekazać się pojemność. Klasa powinna zawierać metodę add() pozwalającą dodać nowego
+pracownika do tablicy pracowników. Zdefiniuj dodatkowo metodę getInfo(), która wykorzystując
+ pętlę for zwróci połączone informacje o wszystkich pracownikach w postaci Stringa.
+SoftwareHouseApp – klasa z metodą main().
+Wszystkie klasy powinny zawierać konstruktor pozwalający zainicjować wszystkie pola danej klasy.
+ Klasy reprezentujące typy danych powinny być JavaBeans. Klasy powinny znajdować się w
+ odpowiednich pakietach.
